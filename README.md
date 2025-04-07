@@ -10,15 +10,10 @@ Additionally, some of the methods are impossible to express in `pip` source file
 An approximation of the definition of `core.socket.ctl` is below (note: this is invalid syntax and will not compile).
 
 ```
-NAME "core.socket.ctl"
-UID 00000000-00000000-0000-0000
-
-TYPES { }
-
-METHODS {
-  static open@0(endpoint: str, protocols: [uid]) -> handle!error;
-  close@1();
-  extend@2(protocols: [uid]) -> !error;
+interface core.socket.ctl(00000000-00000000-0000-0000) {
+	static@0 open(endpoint: str, protocols: [uid]) -> impl<>!err;
+	func@1 close();
+	func@2 extend(protocols: [uid]) -> !err;
 }
 
 ```
