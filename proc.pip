@@ -1,0 +1,10 @@
+interface core.proc.Proc(00000000-00000000-0000-0005) {
+	func@0 exit(code: i8);
+	func@1 debug(message: str);
+	func@2 unstable_anon_alloc(size: usize) -> nsize!err;
+	func@3 unstable_anon_dealloc(ptr: usize, size: usize) -> !err;
+}
+
+interface core.proc.Thread(00000000-00000000-0000-0006) {
+	func@0 set_tcb(ptr: usize) -> !err;
+}
