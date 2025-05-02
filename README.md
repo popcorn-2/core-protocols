@@ -1,6 +1,9 @@
 # Core Popcorn2 protocols
 
 This repository contains the [`.pip` source files](https://popcorn-2.github.io/book/ipc.html) for all core Popcorn2 protocols (common name beginning with `core.`, and GUID of the form `00000000-00000000-0000-XXXX`).
+These are contained within the `source` subfolder.
+Additionally, CI generated language bindings for various languages are contained within their respective subfolders.
+
 With a couple of exceptions (see below), none of these are technically required for a functional Popcorn2 installation.
 However, all system libraries, and therefore all compiled exectuables, will assume existence of all of them, so replacing them would require a large amount of work.
 In a typical installation these protocols will be compiled to `.pipb` files and installed to `/System/proto/`.
