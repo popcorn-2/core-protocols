@@ -33,6 +33,8 @@ mod result {
 			if self.0 < 0 { panic!("called `Result::unwrap()` on an `Err` value: {}", -self.0) }
 			unsafe { addr_of!(self.0).cast::<T>().read() }
 		}
+
+		pub fn as_raw(self) -> isize { self.0 }
 	}
 
 	impl<T: OkTy> From<isize> for Result<T> {
