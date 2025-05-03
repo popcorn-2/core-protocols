@@ -49,9 +49,9 @@ pub mod core {
 				unsafe {
 					#[cfg(target_arch = "x86_64")]
 					core::arch::asm!(
-						"xchg r12, rbp",
+						"xchg r12, rbx",
 						"syscall",
-						"xchg r12, rbp",
+						"xchg r12, rbx",
 						inout("xmm0") num => _,
 						inout("rax") a => ret,
 						inout("rdi") b => _,
