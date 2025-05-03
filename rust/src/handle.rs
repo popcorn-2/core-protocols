@@ -2,7 +2,7 @@ use crate::protocol;
 
 #[derive(Debug)]
 #[repr(transparent)]
-pub struct Handle(usize);
+pub struct Handle(pub usize);
 
 impl Handle {
 	pub fn open() -> crate::Result<Self> {
@@ -17,3 +17,4 @@ impl protocol::core::object::Object for Handle {
 }
 
 impl protocol::core::io::Write for Handle {}
+impl protocol::core::io::Read for Handle {}
