@@ -1,7 +1,7 @@
 pub mod core {
 	pub mod io {
 		pub trait Write: super::object::Object {
-			const UID: u128 = 0;
+			const UID: u128 = 2;
 			const WRITE: u128 = 0;
 			const PUT: u128 = 1<<96;
 
@@ -11,6 +11,22 @@ pub mod core {
 					self.as_raw_fd(),
 					0,
 					data.as_ptr() as _,
+					data.len(),
+				).into()
+			}
+		}
+
+		pub trait Read: super::object::Object {
+			const UID: u128 = 3;
+			const READ: u128 = 0;
+			const GET: u128 = 1<<96;
+
+			fn read(&mut self, data: &mut [u8]) -> crate::Result<usize> {
+				Self::__syscall(
+					Self::UID | Self::READ,
+					self.as_raw_fd(),
+					0,
+					data.as_mut_ptr() as _,
 					data.len(),
 				).into()
 			}
