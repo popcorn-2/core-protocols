@@ -36,7 +36,16 @@ pub mod core {
 	pub mod object {
 		use core::simd::u32x4;
 
-		pub trait Object {
+		mod private {
+			pub trait Sealed {}
+
+			impl Sealed for crate::handle::Handle {}
+		}
+
+		#[diagnostic::on_unimplemented(
+			message = "cannot pass trait to `create!()` which isn't a protocol"
+		)]
+		pub trait Object: private::Sealed {
 			fn __syscall(proto_method: u128, a: usize, b: usize, c: usize, d: usize) -> isize {
 				let num = u32x4::from_array([
 					proto_method as _,
