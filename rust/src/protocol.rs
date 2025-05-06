@@ -107,7 +107,7 @@ pub mod core {
 		}
 	}
 }
-
+#[cfg(not(feature = "rustc-dep-of-std"))]
 #[cfg(target_os = "popcorn")]
 #[macro_export]
 macro_rules! create {
@@ -120,12 +120,7 @@ macro_rules! create {
 		    struct _Test2<T: $tr2>(_Test<T>);
 	    })*
 
-	    #[cfg(not(feature = "rustc-dep-of-std"))]
-	    type E = ::std::io::Error;
-	    #[cfg(feature = "rustc-dep-of-std")]
-	    type E = crate::io::Error;
-
-		fn shim() -> Result<impl $tr $(+ $tr2)*, E> {
+		fn shim() -> Result<impl $tr $(+ $tr2)*, ::std::io::Error> {
 			let path: &str = $path;
 			let res = <$crate::handle::Handle as $crate::protocol::core::object::Object>::__syscall(
 				0,
@@ -138,7 +133,41 @@ macro_rules! create {
 		    if res >= 0 {
 				Ok($crate::handle::Handle(res as usize))
 			} else {
-				Err(E::from_raw_os_error(-res))
+				Err(::std::io::Error::from_raw_os_error(-res))
+			}
+		}
+
+	    shim()
+    }};
+}
+
+#[cfg(feature = "rustc-dep-of-std")]
+#[cfg(target_os = "popcorn")]
+#[macro_export]
+macro_rules! create {
+    ($path:literal, impl $tr:path $(| $tr2:path)*) => {{
+	    struct _Test<T: $crate::protocol::core::object::Object>(::core::marker::PhantomData<T>);
+	    {
+		    struct _Test2<T: $tr>(_Test<T>);
+	    }
+	    $({
+		    struct _Test2<T: $tr2>(_Test<T>);
+	    })*
+
+		fn shim() -> Result<impl $tr $(+ $tr2)*, crate::io::Error> {
+			let path: &str = $path;
+			let res = <$crate::handle::Handle as $crate::protocol::core::object::Object>::__syscall(
+				0,
+				path.as_ptr() as usize,
+				path.len(),
+				0,
+				0,
+			);
+
+		    if res >= 0 {
+				Ok($crate::handle::Handle(res as usize))
+			} else {
+				Err(crate::io::Error::from_raw_os_error(-res))
 			}
 		}
 
