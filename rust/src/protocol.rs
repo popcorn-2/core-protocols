@@ -1,36 +1,65 @@
+macro_rules! method {
+    ($name:ident @ $id:literal ($($arg_name: ident : $arg_ty: ty),* $(,)?) => ($b:expr, $c:expr, $d:expr)) => {
+	    fn $name(&mut self, $($arg_name : $arg_ty),*) -> crate::Result<usize> {
+		    Self::__syscall(
+					Self::UID | (($id as u128) << 96),
+					self.as_raw_fd(),
+					$b as _,
+					$c as _,
+					$d as _,
+		    ).into()
+	    }
+    };
+}
+
 pub mod core {
+	pub mod server {
+		use core::mem::MaybeUninit;
+
+		#[repr(C)]
+		pub struct Packet {
+
+		}
+
+		pub trait Sync: super::object::Object {
+			const UID: u128 = 7;
+
+			method!(get@0(data: &mut [MaybeUninit<Packet>]) => (0, data.as_ptr(), data.len()));
+		}
+		impl Sync for crate::handle::Handle {}
+	}
+
+	pub mod proc {
+		pub trait Proc: super::object::Object {
+			const UID: u128 = 5;
+
+			method!(exit@0() => (0,0,0));
+			method!(debug@1(s: &str) => (0, s.as_ptr(), s.len()));
+		}
+		impl Proc for crate::handle::Handle {}
+
+		pub trait Thread: super::object::Object {
+			const UID: u128 = 7;
+
+			method!(set_tcb@0(tcb: *mut u8) => (tcb, 0, 0));
+		}
+		impl Thread for crate::handle::Handle {}
+	}
+
 	pub mod io {
 		pub trait Write: super::object::Object {
 			const UID: u128 = 2;
-			const WRITE: u128 = 0;
-			const PUT: u128 = 1<<96;
 
-			fn write(&mut self, data: &[u8]) -> crate::Result<usize> {
-				Self::__syscall(
-					Self::UID | Self::WRITE,
-					self.as_raw_fd(),
-					0,
-					data.as_ptr() as _,
-					data.len(),
-				).into()
-			}
+			method!(write@0(data: &[u8]) => (0, data.as_ptr(), data.len()));
 		}
+		impl Write for crate::handle::Handle {}
 
 		pub trait Read: super::object::Object {
 			const UID: u128 = 3;
-			const READ: u128 = 0;
-			const GET: u128 = 1<<96;
 
-			fn read(&mut self, data: &mut [u8]) -> crate::Result<usize> {
-				Self::__syscall(
-					Self::UID | Self::READ,
-					self.as_raw_fd(),
-					0,
-					data.as_mut_ptr() as _,
-					data.len(),
-				).into()
-			}
+			method!(read@0(data: &mut [u8]) => (0, data.as_mut_ptr(), data.len()));
 		}
+		impl Read for crate::handle::Handle {}
 	}
 
 	pub mod object {

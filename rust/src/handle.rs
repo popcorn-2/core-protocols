@@ -15,6 +15,3 @@ impl protocol::core::object::Object for Handle {
 		self.0
 	}
 }
-
-impl protocol::core::io::Write for Handle {}
-impl protocol::core::io::Read for Handle {}
