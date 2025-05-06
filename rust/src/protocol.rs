@@ -151,11 +151,8 @@ macro_rules! create {
 				0,
 			);
 
-		    if res >= 0 {
-				Ok($crate::handle::Handle(res as usize))
-			} else {
-				Err(::std::io::Error::from_raw_os_error(-res))
-			}
+			res.map(|h| $crate::handle::Handle)
+			   .map_err(|e| ::std::io::Error::from_raw_os_error)
 		}
 
 	    shim()
@@ -185,11 +182,8 @@ macro_rules! create {
 				0,
 			);
 
-		    if res >= 0 {
-				Ok($crate::handle::Handle(res as usize))
-			} else {
-				Err(crate::io::Error::from_raw_os_error(-res))
-			}
+			res.map(|h| $crate::handle::Handle)
+			   .map_err(|e| crate::io::Error::from_raw_os_error)
 		}
 
 	    shim()
