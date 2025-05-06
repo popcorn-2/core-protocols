@@ -1,6 +1,6 @@
 macro_rules! method {
     ($name:ident @ $id:literal ($($arg_name: ident : $arg_ty: ty),* $(,)?) => ($b:expr, $c:expr, $d:expr)) => {
-	    fn $name(&mut self, $($arg_name : $arg_ty),*) -> crate::Result<usize> {
+	    fn $name(&mut self, $($arg_name : $arg_ty),*) -> Result<usize, usize> {
 		    Self::__syscall(
 					Self::UID | (($id as u128) << 96),
 					self.as_raw_fd(),
@@ -81,11 +81,22 @@ pub mod core {
 			impl Sealed for crate::handle::Handle {}
 		}
 
+		#[derive(Copy, Clone)]
+		#[repr(transparent)]
+		pub struct SyscallResult(isize);
+
+		impl From<SyscallResult> for Result<usize, usize> {
+			fn from(value: SyscallResult) -> Self {
+				if value.0 < 0 { Err(-value.0 as usize) }
+				else { Ok(value.0 as usize) }
+			}
+		}
+
 		#[diagnostic::on_unimplemented(
 			message = "cannot pass trait to `create!()` which isn't a protocol"
 		)]
 		pub trait Object: private::Sealed {
-			fn __syscall(proto_method: u128, a: usize, b: usize, c: usize, d: usize) -> isize {
+			fn __syscall(proto_method: u128, a: usize, b: usize, c: usize, d: usize) -> SyscallResult {
 				let num = u32x4::from_array([
 					proto_method as _,
 					(proto_method >> 32) as _,
@@ -110,7 +121,7 @@ pub mod core {
 						out("r12") _,
 					);
 				}
-				ret
+				SyscallResult(ret)
 			}
 
 			fn as_raw_fd(&self) -> usize;
