@@ -1,6 +1,9 @@
+#[cfg(not(feature = "rustc-dep-of-std"))] type E<T> = std::io::Result<T>;
+#[cfg(feature = "rustc-dep-of-std")] type E<T> = Result<T, isize>;
+
 macro_rules! method {
     ($name:ident @ $id:literal ($($arg_name: ident : $arg_ty: ty),* $(,)?) => ($b:expr, $c:expr, $d:expr)) => {
-	    fn $name(&mut self, $($arg_name : $arg_ty),*) -> std::io::Result<isize> {
+	    fn $name(&mut self, $($arg_name : $arg_ty),*) -> $crate::protocol::E<isize> {
 		    Self::__syscall(
 					Self::UID | (($id as u128) << 96),
 					self.as_raw_fd(),
@@ -85,7 +88,7 @@ pub mod core {
 			message = "cannot pass trait to `create!()` which isn't a protocol"
 		)]
 		pub trait Object: private::Sealed {
-			fn __syscall(proto_method: u128, a: usize, b: usize, c: usize, d: usize) -> std::io::Result<isize> {
+			fn __syscall(proto_method: u128, a: usize, b: usize, c: usize, d: usize) -> crate::protocol::E<isize> {
 				let num = u32x4::from_array([
 					proto_method as _,
 					(proto_method >> 32) as _,
@@ -111,8 +114,15 @@ pub mod core {
 					);
 				}
 
-				if ret < 0 { Err(std::io::Error::from_raw_os_error(-ret)) }
-				else { Ok(ret) }
+				#[cfg(feature = "rustc-dep-of-std")] {
+					if ret < 0 { Err(-ret) }
+					else { Ok(ret) }
+				}
+
+				#[cfg(not(feature = "rustc-dep-of-std"))] {
+					if ret < 0 { Err(std::io::Error::from_raw_os_error(-ret)) }
+					else { Ok(ret) }
+				}
 			}
 
 			fn as_raw_fd(&self) -> usize;
@@ -132,7 +142,7 @@ macro_rules! create {
 		    struct _Test2<T: $tr2>(_Test<T>);
 	    })*
 
-		fn shim() -> Result<impl $tr $(+ $tr2)*, ::std::io::Error> {
+		fn shim() ->  Result<impl $tr $(+ $tr2)*, ::std::io::Error> {
 			let path: &str = $path;
 			let res = <$crate::handle::Handle as $crate::protocol::core::object::Object>::__syscall(
 				0,
