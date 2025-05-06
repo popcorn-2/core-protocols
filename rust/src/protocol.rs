@@ -1,6 +1,15 @@
+#[cfg(feature = "rustc-dep-of-std")]
+type R = crate::io::Result<usize>;
+#[cfg(not(feature = "rustc-dep-of-std"))]
+type R = std::io::Result<usize>;
+#[cfg(feature = "rustc-dep-of-std")]
+type E = crate::io::Error;
+#[cfg(not(feature = "rustc-dep-of-std"))]
+type E = std::io::Error;
+
 macro_rules! method {
     ($name:ident @ $id:literal ($($arg_name: ident : $arg_ty: ty),* $(,)?) => ($b:expr, $c:expr, $d:expr)) => {
-	    fn $name(&mut self, $($arg_name : $arg_ty),*) -> Result<usize, usize> {
+	    fn $name(&mut self, $($arg_name : $arg_ty),*) -> $crate::protocol::R {
 		    Self::__syscall(
 					Self::UID | (($id as u128) << 96),
 					self.as_raw_fd(),
@@ -74,6 +83,7 @@ pub mod core {
 
 	pub mod object {
 		use core::simd::u32x4;
+		use crate::protocol::{E, R};
 
 		mod private {
 			pub trait Sealed {}
@@ -85,9 +95,9 @@ pub mod core {
 		#[repr(transparent)]
 		pub struct SyscallResult(isize);
 
-		impl From<SyscallResult> for Result<usize, usize> {
+		impl From<SyscallResult> for R {
 			fn from(value: SyscallResult) -> Self {
-				if value.0 < 0 { Err(-value.0 as usize) }
+				if value.0 < 0 { Err(E::from_raw_os_error(-value.0)) }
 				else { Ok(value.0 as usize) }
 			}
 		}
