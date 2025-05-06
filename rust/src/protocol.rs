@@ -1,22 +1,13 @@
-#[cfg(feature = "rustc-dep-of-std")]
-type R = crate::io::Result<usize>;
-#[cfg(not(feature = "rustc-dep-of-std"))]
-type R = std::io::Result<usize>;
-#[cfg(feature = "rustc-dep-of-std")]
-type E = crate::io::Error;
-#[cfg(not(feature = "rustc-dep-of-std"))]
-type E = std::io::Error;
-
 macro_rules! method {
     ($name:ident @ $id:literal ($($arg_name: ident : $arg_ty: ty),* $(,)?) => ($b:expr, $c:expr, $d:expr)) => {
-	    fn $name(&mut self, $($arg_name : $arg_ty),*) -> $crate::protocol::R {
+	    fn $name(&mut self, $($arg_name : $arg_ty),*) -> std::io::Result<isize> {
 		    Self::__syscall(
 					Self::UID | (($id as u128) << 96),
 					self.as_raw_fd(),
 					$b as _,
 					$c as _,
 					$d as _,
-		    ).into()
+		    )
 	    }
     };
 }
@@ -83,7 +74,6 @@ pub mod core {
 
 	pub mod object {
 		use core::simd::u32x4;
-		use crate::protocol::{E, R};
 
 		mod private {
 			pub trait Sealed {}
@@ -91,22 +81,11 @@ pub mod core {
 			impl Sealed for crate::handle::Handle {}
 		}
 
-		#[derive(Copy, Clone)]
-		#[repr(transparent)]
-		pub struct SyscallResult(isize);
-
-		impl From<SyscallResult> for R {
-			fn from(value: SyscallResult) -> Self {
-				if value.0 < 0 { Err(E::from_raw_os_error(-value.0)) }
-				else { Ok(value.0 as usize) }
-			}
-		}
-
 		#[diagnostic::on_unimplemented(
 			message = "cannot pass trait to `create!()` which isn't a protocol"
 		)]
 		pub trait Object: private::Sealed {
-			fn __syscall(proto_method: u128, a: usize, b: usize, c: usize, d: usize) -> SyscallResult {
+			fn __syscall(proto_method: u128, a: usize, b: usize, c: usize, d: usize) -> std::io::Result<isize> {
 				let num = u32x4::from_array([
 					proto_method as _,
 					(proto_method >> 32) as _,
@@ -114,7 +93,7 @@ pub mod core {
 					(proto_method >> 96) as _,
 				]);
 
-				let ret;
+				let ret: isize;
 				unsafe {
 					#[cfg(target_arch = "x86_64")]
 					core::arch::asm!(
@@ -131,7 +110,9 @@ pub mod core {
 						out("r12") _,
 					);
 				}
-				SyscallResult(ret)
+
+				if ret < 0 { Err(std::io::Error::from_raw_os_error(-ret)) }
+				else { Ok(ret) }
 			}
 
 			fn as_raw_fd(&self) -> usize;
