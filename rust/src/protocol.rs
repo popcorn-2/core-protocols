@@ -108,7 +108,7 @@ pub mod core {
 	}
 }
 
-#[cfg(not(feature = "rustc-dep-of-std"))]
+#[cfg(target_os = "popcorn")]
 #[macro_export]
 macro_rules! create {
     ($path:literal, impl $tr:path $(| $tr2:path)*) => {{
