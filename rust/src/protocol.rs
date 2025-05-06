@@ -151,8 +151,8 @@ macro_rules! create {
 				0,
 			);
 
-			res.map(|h| $crate::handle::Handle)
-			   .map_err(|e| ::std::io::Error::from_raw_os_error)
+			res.0.map(|h| $crate::handle::Handle)
+			     .map_err(|e| ::std::io::Error::from_raw_os_error)
 		}
 
 	    shim()
@@ -182,8 +182,8 @@ macro_rules! create {
 				0,
 			);
 
-			res.map(|h| $crate::handle::Handle)
-			   .map_err(|e| crate::io::Error::from_raw_os_error)
+			res.0.map(|h| $crate::handle::Handle)
+			     .map_err(|e| crate::io::Error::from_raw_os_error)
 		}
 
 	    shim()
