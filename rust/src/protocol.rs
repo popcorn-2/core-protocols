@@ -6,7 +6,7 @@ macro_rules! method {
 	    fn $name(&mut self, $($arg_name : $arg_ty),*) -> $crate::protocol::E<isize> {
 		    Self::__syscall(
 					Self::UID | (($id as u128) << 96),
-					self.as_raw_fd(),
+					self.as_raw_fd() as usize,
 					$b as _,
 					$c as _,
 					$d as _,
@@ -125,7 +125,7 @@ pub mod core {
 				}
 			}
 
-			fn as_raw_fd(&self) -> usize;
+			fn as_raw_fd(&self) -> isize;
 		}
 	}
 }
