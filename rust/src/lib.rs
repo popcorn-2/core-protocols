@@ -1,5 +1,5 @@
 #![feature(portable_simd)]
-#![no_std]
+#![cfg_attr(feature = "rustc-dep-of-std", no_std)]
 
 pub mod handle;
 pub mod protocol;
