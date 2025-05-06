@@ -120,7 +120,12 @@ macro_rules! create {
 		    struct _Test2<T: $tr2>(_Test<T>);
 	    })*
 
-		fn shim() -> Result<impl $tr $(+ $tr2)*, ::std::io::Error> {
+	    #[cfg(not(feature = "rustc-dep-of-std"))]
+	    type E = ::std::io::Error;
+	    #[cfg(feature = "rustc-dep-of-std")]
+	    type E = crate::io::Error;
+
+		fn shim() -> Result<impl $tr $(+ $tr2)*, E> {
 			let path: &str = $path;
 			let res = <$crate::handle::Handle as $crate::protocol::core::object::Object>::__syscall(
 				0,
@@ -133,7 +138,7 @@ macro_rules! create {
 		    if res >= 0 {
 				Ok($crate::handle::Handle(res as usize))
 			} else {
-				Err(::std::io::Error::from_raw_os_error(-res))
+				Err(E::from_raw_os_error(-res))
 			}
 		}
 
