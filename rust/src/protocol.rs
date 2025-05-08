@@ -44,7 +44,7 @@ pub mod core {
 		impl Proc for crate::handle::Handle {}
 
 		pub trait Thread: super::object::Object {
-			const UID: u128 = 7;
+			const UID: u128 = 6;
 
 			method!(set_tcb@0(tcb: *mut u8) => (tcb, 0, 0));
 			method!(
