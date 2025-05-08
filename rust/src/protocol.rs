@@ -51,9 +51,8 @@ pub mod core {
 				exec@1(
 					f: unsafe extern "C" fn() -> !,
 					stack_top: *mut u8,
-				) => (f, arg, stack_top)
+				) => (f, stack_top, 0)
 			);
-			method!(join@2() => (0, 0, 0));
 		}
 		impl Thread for crate::handle::Handle {}
 	}
