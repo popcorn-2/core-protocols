@@ -49,8 +49,7 @@ pub mod core {
 			method!(set_tcb@0(tcb: *mut u8) => (tcb, 0, 0));
 			method!(
 				exec@1(
-					f: extern "C" fn(*mut core::ffi::c_void) -> *mut core::ffi::c_void,
-					arg: *mut core::ffi::c_void,
+					f: unsafe extern "C" fn() -> !,
 					stack_top: *mut u8,
 				) => (f, arg, stack_top)
 			);
