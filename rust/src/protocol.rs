@@ -53,6 +53,7 @@ pub mod core {
 					stack_top: *mut u8,
 				) => (f, stack_top, 0)
 			);
+			method!(thread_yield@2() => (0,0,0));
 		}
 		impl Thread for crate::handle::Handle {}
 	}
