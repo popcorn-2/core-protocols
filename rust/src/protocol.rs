@@ -142,11 +142,15 @@ macro_rules! create {
 	    })*
 
 		fn shim() ->  Result<impl $tr $(+ $tr2)*, ::std::io::Error> {
-			let path: &str = $path;
+			fn path_val(path: impl ::core::convert::AsRef<std::path::Path>) -> (usize, usize) {
+			    let buf = ::core::convert::AsRef::as_ref(&path).as_encoded_bytes();
+			    (buf.as_ptr() as usize, path.len())
+		    }
+			let (ptr, len) = path_val($path);
 			let res = <$crate::handle::Handle as $crate::protocol::core::object::Object>::__syscall(
 				0,
-				path.as_ptr() as usize,
-				path.len(),
+				ptr,
+				len,
 				0,
 				0,
 			);
@@ -162,7 +166,7 @@ macro_rules! create {
 #[cfg(target_os = "popcorn")]
 #[macro_export]
 macro_rules! create {
-    ($path:literal, impl $tr:path $(| $tr2:path)*) => {{
+    ($path:expr, impl $tr:path $(| $tr2:path)*) => {{
 	    struct _Test<T: $crate::protocol::core::object::Object>(::core::marker::PhantomData<T>);
 	    {
 		    struct _Test2<T: $tr>(_Test<T>);
@@ -172,7 +176,11 @@ macro_rules! create {
 	    })*
 
 		fn shim() -> Result<impl $tr $(+ $tr2)*, crate::io::Error> {
-			let path: &str = $path;
+		    fn path_val(path: impl ::core::convert::AsRef<crate::path::Path>) -> (usize, usize) {
+			    let buf = ::core::convert::AsRef::as_ref(&path).as_encoded_bytes();
+			    (buf.as_ptr() as usize, path.len())
+		    }
+			let (ptr, len) = path_val($path);
 			let res = <$crate::handle::Handle as $crate::protocol::core::object::Object>::__syscall(
 				0,
 				path.as_ptr() as usize,
