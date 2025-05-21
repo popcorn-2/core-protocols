@@ -6,13 +6,13 @@ pub mod protocol;
 
 #[cfg(test)]
 mod test {
+	use crate::create;
 	use crate::handle::Handle;
 	use crate::protocol::core::io::Write;
 
 	#[test]
-	fn foo() {
-		let mut handle = Handle::open().unwrap();
-		handle.write(&[1,2,3,4,5]);
+	fn bar() {
+		let handle = create!("fs:/user/bin/bash", impl crate::protocol::core::proc::Proc);
 	}
 }
 
