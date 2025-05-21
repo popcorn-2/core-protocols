@@ -183,8 +183,8 @@ macro_rules! create {
 			let (ptr, len) = path_val($path);
 			let res = <$crate::handle::Handle as $crate::protocol::core::object::Object>::__syscall(
 				0,
-				path.as_ptr() as usize,
-				path.len(),
+				ptr,
+				len,
 				0,
 				0,
 			);
