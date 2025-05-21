@@ -141,7 +141,7 @@ macro_rules! create {
 		    struct _Test2<T: $tr2>(_Test<T>);
 	    })*
 
-		fn shim() ->  Result<impl $tr $(+ $tr2)*, ::std::io::Error> {
+		let shim = || -> Result<impl $tr $(+ $tr2)*, ::std::io::Error> {
 			fn path_val(path: impl ::core::convert::AsRef<std::path::Path>) -> (usize, usize) {
 			    let buf = ::core::convert::AsRef::as_ref(&path).as_encoded_bytes();
 			    (buf.as_ptr() as usize, path.len())
@@ -175,7 +175,7 @@ macro_rules! create {
 		    struct _Test2<T: $tr2>(_Test<T>);
 	    })*
 
-		fn shim() -> Result<impl $tr $(+ $tr2)*, crate::io::Error> {
+		let shim = || -> Result<impl $tr $(+ $tr2)*, crate::io::Error> {
 		    fn path_val(path: impl ::core::convert::AsRef<crate::path::Path>) -> (usize, usize) {
 			    let buf = ::core::convert::AsRef::as_ref(&path).as_encoded_bytes();
 			    (buf.as_ptr() as usize, path.len())
