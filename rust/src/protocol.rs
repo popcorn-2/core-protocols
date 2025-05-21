@@ -171,7 +171,7 @@ macro_rules! create {
 		    struct _Test2<T: $tr2>(_Test<T>);
 	    })*
 
-		fn shim(path: impl ::core::convert::AsRef<std::path::Path>) -> Result<impl $tr $(+ $tr2)*, crate::io::Error> {
+		fn shim(path: impl ::core::convert::AsRef<crate::path::Path>) -> Result<impl $tr $(+ $tr2)*, crate::io::Error> {
 			let buf = ::core::convert::AsRef::as_ref(&path).as_os_str().as_encoded_bytes();
 			let res = <$crate::handle::Handle as $crate::protocol::core::object::Object>::__syscall(
 				0,
