@@ -1,4 +1,3 @@
-use std::ffi::OsStr;
 use core::marker::PhantomData;
 use crate::proto::Protocol;
 
@@ -8,7 +7,7 @@ pub struct Handle<I> {
 }
 
 impl<I: Protocol> Handle<I> {
-	pub fn new(path: impl AsRef<OsStr>, args: I::Ctor) -> crate::Result<Self> {
+	pub fn new(path: &str, args: I::Ctor) -> crate::Result<Self> {
 		todo!()
 	}
 
