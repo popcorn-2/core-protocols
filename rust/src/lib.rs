@@ -1,18 +1,24 @@
-#![feature(portable_simd)]
-#![cfg_attr(feature = "rustc-dep-of-std", no_std)]
+#![feature(marker_trait_attr)]
+#![feature(macro_metavar_expr_concat)]
+#![cfg_attr(doc, feature(rustdoc_internals))]
+#![cfg_attr(any(feature = "rustc-dep-of-std", not(feature = "std")), no_std)]
 
 pub mod handle;
-pub mod protocol;
+pub mod proto;
 
-#[cfg(test)]
-mod test {
-	use crate::create;
-	use crate::handle::Handle;
-	use crate::protocol::core::io::Write;
-
-	#[test]
-	fn bar() {
-		let handle = create!("fs:/user/bin/bash", impl crate::protocol::core::proc::Proc);
-	}
+#[derive(Debug)]
+#[repr(isize)]
+pub enum SyscallError {
+	Unimplemented = 1,
+	InvalidUtf8 = 2,
+	Overflow = 3,
+	InvalidPointer = 4,
+	InvalidArg = 5,
+	NameInUse = 6,
+	BadServer = 7,
+	BadHandle = 8,
+	ServerDead = 9,
+	AllocationFailure = 10,
 }
 
+pub type Result<T> = core::result::Result<T, SyscallError>;
