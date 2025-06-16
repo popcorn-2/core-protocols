@@ -71,15 +71,15 @@ mod has_protocol {
 macro_rules! protocol {
 	() => {};
     (pub protocol $name:ident = $uid:literal {
-	    ctor => {
+	    ctor$(<$($ctor_lifetime:lifetime),*>)? => {
 		    $($ctor_arg:ident : $ctor_ty:ty),* $(,)?
 	    }
     } $($rest:tt)*) => {
-	    pub struct $name {
+	    pub struct $name $(<$($ctor_lifetime),*>)? {
 		    $(pub $ctor_arg : $ctor_ty),*
 	    }
 
-	    impl $crate::proto::Protocol for $name {
+	    impl $(<$($ctor_lifetime),*>)? $crate::proto::Protocol for $name $(<$($ctor_lifetime),*>)? {
 		    type Ctor = Self;
 		    const UID: &'static [u128] = &[$uid];
 	    }
@@ -88,7 +88,7 @@ macro_rules! protocol {
 
 	    }
 
-	    impl<I: $crate::proto::HasProtocol<$name>> ${concat($name, Tr)} for $crate::handle::Handle<I> {}
+	    impl<$($($ctor_lifetime),*,)? I: $crate::proto::HasProtocol<$name $(<$($ctor_lifetime),*>)?>> ${concat($name, Tr)} for $crate::handle::Handle<I> {}
 
 	    protocol!($($rest)*);
     };
@@ -130,8 +130,8 @@ pub mod core {
 	pub mod proc {
 		protocol! {
 			pub protocol ProcessBuilder = 6 {
-				ctor => {
-					name: &'static str,
+				ctor<'a> => {
+					name: &'a str,
 				}
 			}
 
