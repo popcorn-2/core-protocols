@@ -1,6 +1,7 @@
 use core::marker::PhantomData;
 use crate::proto::Protocol;
 
+#[derive(Debug)]
 pub struct Handle<I> {
 	raw: isize,
 	_phantom: PhantomData<I>,
