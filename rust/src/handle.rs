@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use core::ops::Deref;
 use core::marker::PhantomData;
 use crate::proto::Protocol;
 
