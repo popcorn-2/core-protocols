@@ -43,6 +43,13 @@ impl<I: Protocol> Handle<I> {
 	}
 }
 
+impl<I> Handle<I> {
+	pub fn try_as<T: Protocol>(&self) -> Option<&Handle<T>> {
+		if self.has_protocol::<T>() { Some(unsafe { core::mem::transmute(self) }) }
+		else { None }
+	}
+}
+
 impl<I> Deref for Handle<I> {
 	type Target = RawHandle<I>;
 
