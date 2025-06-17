@@ -74,6 +74,8 @@ macro_rules! protocol {
 	    ctor$(<$($ctor_lifetime:lifetime),*>)? => {
 		    $($ctor_arg:ident : $ctor_ty:ty),* $(,)?
 	    }
+
+	    $(fn $fn_name:ident(&self $(, $fn_arg:ident: $fn_ty:ty)* $(,)?) $(-> $fn_ret:ty)? $f:block);*
     } $($rest:tt)*) => {
 	    pub struct $name $(<$($ctor_lifetime),*>)? {
 		    $(pub $ctor_arg : $ctor_ty),*
@@ -88,7 +90,7 @@ macro_rules! protocol {
 
 	    }
 
-	    impl<$($($ctor_lifetime),*,)? I: $crate::proto::HasProtocol<$name $(<$($ctor_lifetime),*>)?>> ${concat($name, Tr)} for $crate::handle::Handle<I> {}
+	    impl<$($($ctor_lifetime),*,)? I: $crate::proto::HasProtocol<$name $(<$($ctor_lifetime),*>)?>> ${concat($name, Tr)} for $crate::handle::RawHandle<I> {}
 
 	    protocol!($($rest)*);
     };

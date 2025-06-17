@@ -1,23 +1,39 @@
+use std::ops::Deref;
 use core::marker::PhantomData;
 use crate::proto::Protocol;
 
-#[derive(Debug)]
-pub struct Handle<I> {
+#[derive(Debug, Copy, Clone)]
+pub struct RawHandle<I> {
 	raw: isize,
 	_phantom: PhantomData<I>,
 }
 
-impl<I> Handle<I> {
-	pub fn try_as<T: Protocol>(&self) -> Option<&Handle<T>> {
-		None
+#[derive(Debug)]
+pub struct Handle<I> {
+	handle: RawHandle<I>,
+}
+
+impl<I> RawHandle<I> {
+	pub fn destroy(&self) {
+		todo!()
+	}
+
+	pub fn has_protocol<T: Protocol>(&self) -> bool {
+		false
 	}
 
 	pub fn as_raw(&self) -> isize { self.raw }
 
-	pub unsafe fn from_raw(raw: isize) -> Self {
+	pub fn from_raw(raw: isize) -> Self {
 		Self {
 			raw, _phantom: PhantomData
 		}
+	}
+}
+
+impl<I: Protocol> RawHandle<I> {
+	pub fn new(path: &str, args: I::Ctor) -> crate::Result<Self> {
+		todo!()
 	}
 }
 
@@ -27,8 +43,28 @@ impl<I: Protocol> Handle<I> {
 	}
 }
 
+impl<I> Deref for Handle<I> {
+	type Target = RawHandle<I>;
+
+	fn deref(&self) -> &Self::Target {
+		&self.handle
+	}
+}
+
 impl<I> Drop for Handle<I> {
 	fn drop(&mut self) {
-		todo!()
+		self.handle.destroy();
+	}
+}
+
+pub trait FromRawHandle<I> {
+	unsafe fn from_raw_handle(handle: RawHandle<I>) -> Self;
+}
+
+impl<I> FromRawHandle<I> for Handle<I> {
+	unsafe fn from_raw_handle(handle: RawHandle<I>) -> Self {
+		Self {
+			handle
+		}
 	}
 }
