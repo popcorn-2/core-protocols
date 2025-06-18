@@ -2,11 +2,19 @@ use core::ops::Deref;
 use core::marker::PhantomData;
 use crate::proto::Protocol;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct RawHandle<I> {
 	raw: isize,
 	_phantom: PhantomData<I>,
 }
+
+impl<I> Clone for RawHandle<I> {
+	fn clone(&self) -> Self {
+		Self { raw: self.raw, _phantom: PhantomData }
+	}
+}
+
+impl<I> Copy for RawHandle<I> {}
 
 #[derive(Debug)]
 pub struct Handle<I> {
