@@ -50,11 +50,11 @@ impl<I> Drop for Handle<I> {
 	}
 }
 
-pub trait FromRawHandle<I> {
+pub trait FromRawHandle {
 	unsafe fn from_raw_handle(handle: RawHandle) -> Self;
 }
 
-impl<I> FromRawHandle<I> for Handle<I> {
+impl<I> FromRawHandle for Handle<I> {
 	unsafe fn from_raw_handle(handle: RawHandle) -> Self {
 		Self {
 			handle, _phantom: PhantomData
