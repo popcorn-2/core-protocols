@@ -1,16 +1,22 @@
+use std::fmt::{Debug, Formatter};
 use core::marker::PhantomData;
 use crate::proto::{HasProtocol, Protocol};
 
 #[derive(Debug, Copy, Clone)]
 pub struct RawHandle(pub isize);
 
-#[derive(Debug)]
 pub struct Handle<I> {
 	handle: RawHandle,
 	_phantom: PhantomData<I>,
 }
 
 impl<I: Protocol> HasProtocol<I> for Handle<I> {}
+
+impl<I> Debug for Handle<I> {
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+		write!(f, "Handle::<{}>({})", core::any::type_name::<I>(), self.handle.0)
+	}
+}
 
 impl RawHandle {
 	pub fn destroy(&self) {
