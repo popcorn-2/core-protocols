@@ -90,7 +90,7 @@ macro_rules! protocol {
 
 	    }
 
-	    impl<$($($ctor_lifetime),*,)? I: $crate::proto::HasProtocol<$name $(<$($ctor_lifetime),*>)?>> ${concat($name, Tr)} for $crate::handle::RawHandle<I> {}
+	    impl<$($($ctor_lifetime),*,)? H: $crate::handle::AsRawHandle + $crate::proto::HasProtocol<$name $(<$($ctor_lifetime),*>)?>> ${concat($name, Tr)} for H {}
 
 	    protocol!($($rest)*);
     };

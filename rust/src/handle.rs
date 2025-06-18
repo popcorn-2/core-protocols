@@ -1,27 +1,18 @@
-use core::ops::Deref;
 use core::marker::PhantomData;
-use crate::proto::Protocol;
+use crate::proto::{HasProtocol, Protocol};
 
-#[derive(Debug)]
-pub struct RawHandle<I> {
-	raw: isize,
-	_phantom: PhantomData<I>,
-}
-
-impl<I> Clone for RawHandle<I> {
-	fn clone(&self) -> Self {
-		Self { raw: self.raw, _phantom: PhantomData }
-	}
-}
-
-impl<I> Copy for RawHandle<I> {}
+#[derive(Debug, Copy, Clone)]
+pub struct RawHandle(pub isize);
 
 #[derive(Debug)]
 pub struct Handle<I> {
-	handle: RawHandle<I>,
+	handle: RawHandle,
+	_phantom: PhantomData<I>,
 }
 
-impl<I> RawHandle<I> {
+impl<I: Protocol> HasProtocol<I> for Handle<I> {}
+
+impl RawHandle {
 	pub fn destroy(&self) {
 		todo!()
 	}
@@ -29,40 +20,27 @@ impl<I> RawHandle<I> {
 	pub fn has_protocol<T: Protocol>(&self) -> bool {
 		false
 	}
-
-	pub fn as_raw(&self) -> isize { self.raw }
-
-	pub fn from_raw(raw: isize) -> Self {
-		Self {
-			raw, _phantom: PhantomData
-		}
-	}
 }
 
-impl<I: Protocol> RawHandle<I> {
-	pub fn new(path: &str, args: I::Ctor) -> crate::Result<Self> {
+impl RawHandle {
+	pub fn new<I: Protocol>(path: &str, args: I::Ctor) -> crate::Result<Self> {
 		todo!()
 	}
 }
 
 impl<I: Protocol> Handle<I> {
 	pub fn new(path: &str, args: I::Ctor) -> crate::Result<Self> {
-		todo!()
+		Ok(Self {
+			handle: RawHandle::new::<I>(path, args)?,
+			_phantom: PhantomData,
+		})
 	}
 }
 
 impl<I> Handle<I> {
 	pub fn try_as<T: Protocol>(&self) -> Option<&Handle<T>> {
-		if self.has_protocol::<T>() { Some(unsafe { core::mem::transmute(self) }) }
+		if self.handle.has_protocol::<T>() { Some(unsafe { core::mem::transmute(self) }) }
 		else { None }
-	}
-}
-
-impl<I> Deref for Handle<I> {
-	type Target = RawHandle<I>;
-
-	fn deref(&self) -> &Self::Target {
-		&self.handle
 	}
 }
 
@@ -73,13 +51,44 @@ impl<I> Drop for Handle<I> {
 }
 
 pub trait FromRawHandle<I> {
-	unsafe fn from_raw_handle(handle: RawHandle<I>) -> Self;
+	unsafe fn from_raw_handle(handle: RawHandle) -> Self;
 }
 
 impl<I> FromRawHandle<I> for Handle<I> {
-	unsafe fn from_raw_handle(handle: RawHandle<I>) -> Self {
+	unsafe fn from_raw_handle(handle: RawHandle) -> Self {
 		Self {
-			handle
+			handle, _phantom: PhantomData
 		}
+	}
+}
+
+pub trait AsRawHandle {
+	fn as_raw_handle(&self) -> RawHandle;
+}
+
+impl<I> AsRawHandle for Handle<I> {
+	fn as_raw_handle(&self) -> RawHandle {
+		self.handle
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use std::marker::PhantomData;
+	use crate::handle::{Handle, RawHandle};
+	use crate::proto::core::io::Read;
+
+	trait Foo {
+		fn foo(&self);
+	}
+	impl<H: crate::handle::AsRawHandle + crate::proto::HasProtocol<Read>> Foo for H {
+		fn foo(&self) {
+			self.as_raw_handle();
+		}
+	}
+
+	fn foo() {
+		let handle = Handle::<Read>::new("foo", Read {}).unwrap();
+		handle.foo();
 	}
 }
