@@ -1,0 +1,5 @@
+interface Sync() @ 0000-0000-0000-000000000008 {
+    func@1 next(buffer: addr)
+    func@2 reply(buffer: addr)
+    func@3 forge(handle_num: int, protocols: [proto]) -> handle<_>
+}

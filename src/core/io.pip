@@ -1,0 +1,14 @@
+interface Seek() @ 0000-0000-0000-000000000004 {
+    func@1 tell() -> uint
+    func@2 set_pos(pos: uint)
+}
+
+interface Read() @ 0000-0000-0000-000000000002 {
+    func@1 read() -> [byte]
+}
+
+interface Write() @ 0000-0000-0000-000000000003 {
+    func@1 write(buf: [byte]) -> uint
+}
+
+interface Terminal() @ 0000-0000-0000-000000000005 {}

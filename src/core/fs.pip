@@ -1,0 +1,1 @@
+interface File(create: uint, append: bool, truncate: bool) @ 0000-0000-0000-000000000001 {}

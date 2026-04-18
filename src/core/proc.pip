@@ -1,0 +1,18 @@
+interface Thread() @ 0000-0000-0000-00000000000A {
+    func@1 unstable_anon_alloc(size: uint) -> addr
+    func@2 unstable_anon_dealloc(pointer: addr)
+    func@3 set_tcb(pointer: addr)
+    func@4 spawn_thread(name: string, stack_top: addr, entry: addr) -> handle<core.proc.Thread>
+    func@5 yield_now()
+    func@6 unstable_mmio_alloc(physical_addr: uint, size: uint) -> addr
+    func@7 exit(code: int)
+    func@8 join() -> int
+    func@9 map_vmo(vmo: handle<_>, address: addr, len: uint, offset: uint) -> addr
+}
+
+interface Builder() @ 0000-0000-0000-000000000009 {
+    func@1 ~spawn() -> handle<core.proc.Thread>
+    func@2 add_handle(name: string, handle: handle<_>)
+    func@3 add_env_var(val: string)
+    func@4 add_arg(val: string)
+}
